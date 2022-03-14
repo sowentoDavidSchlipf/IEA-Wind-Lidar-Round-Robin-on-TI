@@ -49,4 +49,4 @@ CompareLOS(Reference_10min,Lidar_10min)
 %% get 10 min reference TI
 Reference_10min.LOS_TI_N = Reference_10min.LOS_N_std./Reference_10min.LOS_N_mean;
 Reference_10min.LOS_TI_S = Reference_10min.LOS_S_std./Reference_10min.LOS_S_mean;
-WriteReferenceFile(Reference_10min,'Reference.csv')
+WriteReferenceFile(Reference_10min,'ReferencePulsed.csv')
