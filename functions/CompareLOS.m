@@ -16,7 +16,7 @@ axis equal
 xlim(range_WS)
 ylim(range_WS)
 p = polyfit(Reference_10min.LOS_N_mean,Lidar_10min.LOS_N_mean,1);
-text(2,1,['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
+text(0.1*range_WS(2),0.9*range_WS(2),['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
 
 subplot(2,2,2)
 hold on;box on;grid on
@@ -29,7 +29,7 @@ axis equal
 xlim(range_WS)
 ylim(range_WS)
 p = polyfit(Reference_10min.LOS_S_mean,Lidar_10min.LOS_S_mean,1);
-text(2,1,['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
+text(0.1*range_WS(2),0.9*range_WS(2),['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
 
 
 subplot(2,2,3)
@@ -42,6 +42,8 @@ ylabel('Lidar [m/s]')
 axis equal
 xlim(range_TI)
 ylim(range_TI)
+p = polyfit(Reference_10min.LOS_N_std,Lidar_10min.LOS_N_std,1);
+text(0.1*range_TI(2),0.9*range_TI(2),['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
 
 subplot(2,2,4)
 hold on;box on;grid on
@@ -53,6 +55,8 @@ ylabel('Lidar [m/s]')
 axis equal
 xlim(range_TI)
 ylim(range_TI)
+p = polyfit(Reference_10min.LOS_S_std,Lidar_10min.LOS_S_std,1);
+text(0.1*range_TI(2),0.9*range_TI(2),['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
 
 
 end

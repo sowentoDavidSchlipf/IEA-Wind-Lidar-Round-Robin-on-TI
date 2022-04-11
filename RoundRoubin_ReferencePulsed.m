@@ -2,6 +2,7 @@
 % Project: IEA Wind Task 32
 % Round Robin on turbulence estimates from nacelle mounted lidar systems
 % by Feng Guo and David Schlipf @ Flensburg University of Applied Sciences
+% v4: 11-Apr-2022: add new data
 % v3: 10-Apr-2022: store data to speed up 2nd run 
 % v2: 14-Mar-2022: modular setup
 % v1: 30-Nov-2021: initial version
@@ -17,19 +18,24 @@ PlotCoordinate(Coordinate)
 if isfile('Data.mat') % datenum takes a while, so we better store the data
     load('Data.mat','Mast_N','Mast_S','Lidar_N','Lidar_S');
 else 
-    Mast_N          = readtable('TMMN_20200903_20200904_1Hz_new.csv');
-    Mast_S       	= readtable('TMMS_20200903_20200904_1Hz_new.csv');
+    Mast_N          = readtable('TMMN_20200903_20200904_1Hz_new.csv'); % lines 14704-14707 with text removed 
+    Mast_S          = readtable('TMMS_20200903_20200904_1Hz_new.csv'); % lines 14704-14707 with text removed 
     Lidar_N        	= readtable('Lidar_20200903-20200904_1Hz_LOS3_178m.csv');
     Lidar_S       	= readtable('Lidar_20200903-20200904_1Hz_LOS2_178m.csv');
-    % remove first row, since there are 61 samples for first minute
-    Mast_S(1,:)     = [];    
+    % remove double entries 
+    [~,IdxUnique,~] = unique(Mast_S.TIMESTAMP);
+    Mast_S          = Mast_S(IdxUnique,:);  
     % add numeric time
-    Mast_N.t      	= datenum(Mast_N.TIMESTAMP)+repmat([0:59]',24*60,1)/60/60/24; % add seconds
-    Mast_S.t     	= datenum(Mast_S.TIMESTAMP)+repmat([0:59]',24*60,1)/60/60/24; % add seconds
+    Mast_N.t      	= datenum(Mast_N.TIMESTAMP);
+    Mast_S.t     	= datenum(Mast_S.TIMESTAMP);
     Lidar_N.t     	= datenum(Lidar_N.Timestamp,'yyyy-mm-ddTHH:MM:SS.FFF');
     Lidar_S.t      	= datenum(Lidar_S.Timestamp,'yyyy-mm-ddTHH:MM:SS.FFF');
     save('Data.mat','Mast_N','Mast_S','Lidar_N','Lidar_S');
 end
+
+% Remove manually some outliers for cup and interpolate
+GoodData            = [1:82155,82210:82260,82310:86400];% identified using cursor
+Mast_N.WS1          = interp1(Mast_N.t(GoodData),Mast_N.WS1(GoodData),Mast_N.t);
 
 CompareSonicToCupAndVane(Mast_S,Mast_N)
 
