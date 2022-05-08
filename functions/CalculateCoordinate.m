@@ -27,7 +27,7 @@ y_F_L                       = x_F_L.*[-1  1]*tan(HorizontalHalfOpeningAngle);
 z_F_L                       = x_F_L.*[-1 -1]*tan(VerticalHalfOpeningAngle);
 
 % transformation into inertial coordinate system
-YawLidar                    = (YawMast_N+YawMast_S)/2+deg2rad(1.6);
+YawLidar                    = (YawMast_N+YawMast_S)/2+deg2rad(1.6); % 1.6 deg: estimated rotation of lidar
 PitchLidar                  = -deg2rad(5);
 RollLidar                   = 0;
 [x_F_I,y_F_I,~]             = L2I(x_F_L,y_F_L,z_F_L,YawLidar,PitchLidar,RollLidar);

@@ -19,6 +19,13 @@ for i_10min= 1:n_10min
     Reference_10min.U_S_mean(i_10min)     = nanmean(Reference.U_S  (Considered));
     Reference_10min.V_N_mean(i_10min)     = nanmean(Reference.V_N  (Considered));
     Reference_10min.V_S_mean(i_10min)     = nanmean(Reference.V_S  (Considered));
+  	Reference_10min.WS_N_mean(i_10min)    = nanmean(Reference.WS_N (Considered));    
+    Reference_10min.WS_S_mean(i_10min)    = nanmean(Reference.WS_S (Considered));
+  	Reference_10min.WS_N_std(i_10min)     = nanstd (Reference.WS_N (Considered));
+    Reference_10min.WS_S_std(i_10min)     = nanstd (Reference.WS_S (Considered));    
+  	Reference_10min.WD_N_mean(i_10min)    = nanmean(Reference.WD_N (Considered));    
+    Reference_10min.WD_S_mean(i_10min)    = nanmean(Reference.WD_S (Considered));
+    
 end
 
 % add time vector

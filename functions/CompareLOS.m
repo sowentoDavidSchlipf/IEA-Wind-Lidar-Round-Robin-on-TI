@@ -1,62 +1,27 @@
 function CompareLOS(Reference_10min,Lidar_10min)
+% Compares Lidar and Reference TI in LOS
+% DS on 07-May-2022
 
-range_WS = [0 10];
-range_TI = [0 2.5];
+range_MEAN  = [0 10];
+range_STD   = [0 2.5];
+range_TI    = [0 0.4];
 
-figure('Name','LOS mean and std. regression')
+% Reference-Lidar
+m           = 2;
+n           = 3;
 
-subplot(2,2,1)
-hold on;box on;grid on
-plot(Reference_10min.LOS_N_mean,Lidar_10min.LOS_N_mean,'.');
-plot(range_WS,range_WS);
-title('Mean LOS, North')
-xlabel('Reference [m/s]')
-ylabel('Lidar [m/s]')
-axis equal
-xlim(range_WS)
-ylim(range_WS)
-p = polyfit(Reference_10min.LOS_N_mean,Lidar_10min.LOS_N_mean,1);
-text(0.1*range_WS(2),0.9*range_WS(2),['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
-
-subplot(2,2,2)
-hold on;box on;grid on
-plot(Reference_10min.LOS_S_mean,Lidar_10min.LOS_S_mean,'.')
-plot(range_WS,range_WS);
-title('Mean LOS, South')
-xlabel('Reference [m/s]')
-ylabel('Lidar [m/s]')
-axis equal
-xlim(range_WS)
-ylim(range_WS)
-p = polyfit(Reference_10min.LOS_S_mean,Lidar_10min.LOS_S_mean,1);
-text(0.1*range_WS(2),0.9*range_WS(2),['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
-
-
-subplot(2,2,3)
-hold on;box on;grid on
-plot(Reference_10min.LOS_N_std,Lidar_10min.LOS_N_std,'.')
-plot(range_TI,range_TI);
-title('STD LOS, North')
-xlabel('Reference [m/s]')
-ylabel('Lidar [m/s]')
-axis equal
-xlim(range_TI)
-ylim(range_TI)
-p = polyfit(Reference_10min.LOS_N_std,Lidar_10min.LOS_N_std,1);
-text(0.1*range_TI(2),0.9*range_TI(2),['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
-
-subplot(2,2,4)
-hold on;box on;grid on
-plot(Reference_10min.LOS_S_std,Lidar_10min.LOS_S_std,'.')
-plot(range_TI,range_TI);
-title('STD LOS, South')
-xlabel('Reference [m/s]')
-ylabel('Lidar [m/s]')
-axis equal
-xlim(range_TI)
-ylim(range_TI)
-p = polyfit(Reference_10min.LOS_S_std,Lidar_10min.LOS_S_std,1);
-text(0.1*range_TI(2),0.9*range_TI(2),['y=',num2str(p(2),'%4.2f'),'+',num2str(p(1),'%4.2f'),' x'])
-
+figure('Name','Regression Reference-Lidar')
+RegressionSubPlot(m,n,1,Reference_10min.LOS_N_mean,Lidar_10min.LOS_N_mean,...
+    range_MEAN,'Reference N [m/s]','Lidar N [m/s]','MEAN LOS, North');
+RegressionSubPlot(m,n,2,Reference_10min.LOS_N_std, Lidar_10min.LOS_N_std,...
+    range_STD, 'Reference N [m/s]','Lidar N [m/s]','STD LOS, North');
+RegressionSubPlot(m,n,3,Reference_10min.LOS_TI_N,  Lidar_10min.LOS_TI_N,...
+    range_TI,  'Reference N [-]',  'Lidar N [-]',  'TI LOS, North');
+RegressionSubPlot(m,n,4,Reference_10min.LOS_S_mean,Lidar_10min.LOS_S_mean,...
+    range_MEAN,'Reference S [m/s]','Lidar S [m/s]','MEAN LOS, South');
+RegressionSubPlot(m,n,5,Reference_10min.LOS_S_std, Lidar_10min.LOS_S_std,...
+    range_STD ,'Reference S [m/s]','Lidar S [m/s]','STD LOS, South');
+RegressionSubPlot(m,n,6,Reference_10min.LOS_TI_S,  Lidar_10min.LOS_TI_S,...
+    range_TI  ,'Reference S [-]',  'Lidar S [-]',  'TI LOS, South');
 
 end

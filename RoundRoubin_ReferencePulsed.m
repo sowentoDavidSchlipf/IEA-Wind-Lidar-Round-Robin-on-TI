@@ -2,6 +2,8 @@
 % Project: IEA Wind Task 32
 % Round Robin on turbulence estimates from nacelle mounted lidar systems
 % by Feng Guo and David Schlipf @ Flensburg University of Applied Sciences
+% v5: 07-May-2022: projection using angles provided by DNV, not via
+%                   coordinates, add TI, nicer comparison 
 % v4: 11-Apr-2022: add new data
 % v3: 10-Apr-2022: store data to speed up 2nd run 
 % v2: 14-Mar-2022: modular setup
@@ -40,23 +42,25 @@ Mast_N.WS1          = interp1(Mast_N.t(GoodData),Mast_N.WS1(GoodData),Mast_N.t);
 CompareSonicToCupAndVane(Mast_S,Mast_N)
 
 %% Calculate reference U (wind in x: W->E), V (wind in y: S->N)
-Yaw_S              	= 270-Mast_S.USA_WD;
 Yaw_N             	= 270-Mast_N.USA_WD;
-Reference.U_S      	= Mast_S.WS1.*cosd(Yaw_S);
-Reference.V_S     	= Mast_S.WS1.*sind(Yaw_S);
+Yaw_S              	= 270-Mast_S.USA_WD;
 Reference.U_N    	= Mast_N.WS1.*cosd(Yaw_N);
 Reference.V_N     	= Mast_N.WS1.*sind(Yaw_N);
+Reference.U_S      	= Mast_S.WS1.*cosd(Yaw_S);
+Reference.V_S     	= Mast_S.WS1.*sind(Yaw_S);
 Reference.t         = Mast_N.t; % should be the same for N and S
+Reference.WS_N      = Mast_N.WS1;
+Reference.WS_S      = Mast_S.WS1;
+Reference.WD_N      = Mast_N.USA_WD;
+Reference.WD_S      = Mast_S.USA_WD;
 
-%% Calculate reference LOS
-% unit vectors
-LidarVector_N    	= [Coordinate.Focus_N(1) Coordinate.Focus_N(2) Coordinate.Focus_N(3)];
-LidarVector_S    	= [Coordinate.Focus_S(1) Coordinate.Focus_S(2) Coordinate.Focus_S(3)];
-LidarUnitVector_N 	= LidarVector_N/norm(LidarVector_N);
-LidarUnitVector_S  	= LidarVector_S/norm(LidarVector_S);
-% measurement equation: ignoring w, convention LOS is positive if towards system
-Reference.LOS_S    	= -(LidarUnitVector_S(1)*Reference.U_S + LidarUnitVector_S(2)*Reference.V_S);
-Reference.LOS_N    	= -(LidarUnitVector_N(1)*Reference.U_N + LidarUnitVector_N(2)*Reference.V_N);
+%% Calculate reference LOS=-(xu+yv+zw)
+% angles of lidar beams in inertial coordinate system 
+Yaw_L_N             = 270-255.2; % 255.2 deg provided by DNV, 248.2 leads to y=-0.06+1.00x
+Yaw_L_S             = 270-222.8; % 222.8 deg provided by DNV, 221.0 leads to y= 0.00+1.00x
+% measurement equation: ignoring w
+Reference.LOS_N    	= cosd(Yaw_L_N)*Reference.U_N + sind(Yaw_L_N)*Reference.V_N;
+Reference.LOS_S    	= cosd(Yaw_L_S)*Reference.U_S + sind(Yaw_L_S)*Reference.V_S;
 
 %% get 10 min mean for reference 
 Tstart          = '2020-09-03 19:00:00';
@@ -66,4 +70,21 @@ Reference_10min = Calculate10minStastics_Reference(Reference,Tstart,Tend);
 %% get 10 min reference TI
 Reference_10min.LOS_TI_N = Reference_10min.LOS_N_std./Reference_10min.LOS_N_mean;
 Reference_10min.LOS_TI_S = Reference_10min.LOS_S_std./Reference_10min.LOS_S_mean;
+Reference_10min.TI_N     = Reference_10min.WS_N_std./ Reference_10min.WS_N_mean;
+Reference_10min.TI_S     = Reference_10min.WS_S_std./ Reference_10min.WS_S_mean;
 WriteReferenceFile(Reference_10min,'ReferencePulsed.csv')
+CompareNS(Reference_10min)
+
+%% Calculate Statistics Lidar
+% remove data with error code
+BadData_N             	= Lidar_N.Distance==9999;
+Lidar_N.RWS(BadData_N)  = interp1(Lidar_N.t(~BadData_N),Lidar_N.RWS(~BadData_N),Lidar_N.t(BadData_N));
+BadData_S            	= Lidar_S.Distance==9999;
+Lidar_S.RWS(BadData_S)	= interp1(Lidar_S.t(~BadData_S),Lidar_S.RWS(~BadData_S),Lidar_S.t(BadData_S));
+% Calculate 10 min statistics
+Lidar_10min             = Calculate10minStastics_Lidar(Lidar_N,Lidar_S,Tstart,Tend); 
+% Calculate 10 min TI
+Lidar_10min.LOS_TI_N    = Lidar_10min.LOS_N_std./Lidar_10min.LOS_N_mean;
+Lidar_10min.LOS_TI_S    = Lidar_10min.LOS_S_std./Lidar_10min.LOS_S_mean;
+% compare lidar vs Reference
+CompareLOS(Reference_10min,Lidar_10min)
