@@ -1,7 +1,6 @@
-function CompareSonicToCupAndVane(Mast_S,Mast_N)
+function CompareSonicToCupAndVane(Mast_S,Mast_N,Tstart,Tend)
 
-MyXlim = [  datenum('2020-09-03 19:00:00')...
-            datenum('2020-09-04 19:00:00')];
+MyXlim = [datenum(Tstart),datenum(Tend)];
 
 figure('Name','Comparison Sonic to Cup/Vane')
 

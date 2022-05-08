@@ -39,7 +39,10 @@ end
 GoodData            = [1:82155,82210:82260,82310:86400];% identified using cursor
 Mast_N.WS1          = interp1(Mast_N.t(GoodData),Mast_N.WS1(GoodData),Mast_N.t);
 
-CompareSonicToCupAndVane(Mast_S,Mast_N)
+% limits only for time plots
+Tstart          = '2020-09-03 19:00:00'; 
+Tend            = '2020-09-04 19:00:00';
+CompareSonicToCupAndVane(Mast_S,Mast_N,Tstart,Tend);
 
 %% Calculate reference U (wind in x: W->E), V (wind in y: S->N)
 Yaw_N             	= 270-Mast_N.USA_WD;
