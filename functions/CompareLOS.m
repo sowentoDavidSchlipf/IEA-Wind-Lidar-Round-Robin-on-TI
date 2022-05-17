@@ -1,10 +1,6 @@
-function CompareLOS(Reference_10min,Lidar_10min)
+function CompareLOS(Reference_10min,Lidar_10min,range_MEAN,range_STD,range_TI)
 % Compares Lidar and Reference TI in LOS
 % DS on 07-May-2022
-
-range_MEAN  = [0 10];
-range_STD   = [0 2.5];
-range_TI    = [0 0.4];
 
 % Reference-Lidar
 m           = 2;

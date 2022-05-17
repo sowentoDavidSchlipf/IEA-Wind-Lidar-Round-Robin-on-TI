@@ -1,4 +1,4 @@
-function CompareSonicToCupAndVane(Mast_S,Mast_N,Tstart,Tend)
+function CompareSonicToCupAndVane(Mast_S,Mast_N,Tstart,Tend,range_MEAN,range_WD)
 
 MyXlim = [datenum(Tstart),datenum(Tend)];
 
@@ -91,8 +91,6 @@ datetick('x','keeplimits')
 % Sonic - Cup Regression
 m           = 2;
 n           = 2;
-range_MEAN  = [0 15];
-range_WD    = [100 400];
 
 figure('Name','Regression Sonic-Cup')
 RegressionSubPlot(m,n,1,Mast_N.USA_WShorizontal,Mast_N.WS1,...

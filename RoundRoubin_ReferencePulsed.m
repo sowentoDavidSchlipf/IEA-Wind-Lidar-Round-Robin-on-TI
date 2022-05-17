@@ -2,13 +2,14 @@
 % Project: IEA Wind Task 32
 % Round Robin on turbulence estimates from nacelle mounted lidar systems
 % by Feng Guo and David Schlipf @ Flensburg University of Applied Sciences
-% v6: 17-May-2022: projection using angles from optimization
-% v5: 07-May-2022: projection using angles provided by DNV, not via
+% v7: 17-May-2022, DS: alignment with cw code
+% v6: 17-May-2022, DS: projection using angles from optimization
+% v5: 07-May-2022, DS: projection using angles provided by DNV, not via
 %                   coordinates, add TI, nicer comparison 
-% v4: 11-Apr-2022: add new data
-% v3: 10-Apr-2022: store data to speed up 2nd run 
-% v2: 14-Mar-2022: modular setup
-% v1: 30-Nov-2021: initial version
+% v4: 11-Apr-2022, DS: add new data
+% v3: 10-Apr-2022, DS: store data to speed up 2nd run 
+% v2: 14-Mar-2022, DS: modular setup
+% v1: 30-Nov-2021, FG: initial version
 
 clearvars;clc;close all
 addpath('functions')
@@ -18,8 +19,8 @@ Coordinate      =  CalculateCoordinate;
 PlotCoordinate(Coordinate)
 
 %% Load Data and compare Sonic Cup and Vane
-if isfile('Data.mat') % datenum takes a while, so we better store the data
-    load('Data.mat','Mast_N','Mast_S','Lidar_N','Lidar_S');
+if isfile('Data_pulsed_Period1.mat') % datenum takes a while, so we better store the data
+    load('Data_pulsed_Period1.mat','Mast_N','Mast_S','Lidar_N','Lidar_S');
 else 
     Mast_N          = readtable('TMMN_20200903_20200904_1Hz_new.csv'); % lines 14704-14707 with text removed 
     Mast_S          = readtable('TMMS_20200903_20200904_1Hz_new.csv'); % lines 14704-14707 with text removed 
@@ -33,7 +34,7 @@ else
     Mast_S.t     	= datenum(Mast_S.TIMESTAMP);
     Lidar_N.t     	= datenum(Lidar_N.Timestamp,'yyyy-mm-ddTHH:MM:SS.FFF');
     Lidar_S.t      	= datenum(Lidar_S.Timestamp,'yyyy-mm-ddTHH:MM:SS.FFF');
-    save('Data.mat','Mast_N','Mast_S','Lidar_N','Lidar_S');
+    save('Data_pulsed_Period1.mat','Mast_N','Mast_S','Lidar_N','Lidar_S');
 end
 
 % Remove manually some outliers for cup and interpolate
@@ -43,7 +44,9 @@ Mast_N.WS1          = interp1(Mast_N.t(GoodData),Mast_N.WS1(GoodData),Mast_N.t);
 % limits only for time plots
 Tstart          = '2020-09-04 08:00:00'; 
 Tend            = '2020-09-04 10:00:00';
-CompareSonicToCupAndVane(Mast_S,Mast_N,Tstart,Tend);
+range_MEAN      = [0 15];
+range_WD        = [100 400];
+CompareSonicToCupAndVane(Mast_S,Mast_N,Tstart,Tend,range_MEAN,range_WD);
 
 %% Calculate reference U (wind in x: W->E), V (wind in y: S->N)
 Yaw_N             	= 270-Mast_N.USA_WD;
@@ -52,7 +55,8 @@ Reference.U_N    	= Mast_N.WS1.*cosd(Yaw_N);
 Reference.V_N     	= Mast_N.WS1.*sind(Yaw_N);
 Reference.U_S      	= Mast_S.WS1.*cosd(Yaw_S);
 Reference.V_S     	= Mast_S.WS1.*sind(Yaw_S);
-Reference.t         = Mast_N.t; % should be the same for N and S
+Reference.t_N       = Mast_N.t; 
+Reference.t_S       = Mast_S.t; 
 Reference.WS_N      = Mast_N.WS1;
 Reference.WS_S      = Mast_S.WS1;
 Reference.WD_N      = Mast_N.USA_WD;
@@ -77,7 +81,11 @@ Reference_10min.LOS_TI_S = Reference_10min.LOS_S_std./Reference_10min.LOS_S_mean
 Reference_10min.TI_N     = Reference_10min.WS_N_std./ Reference_10min.WS_N_mean;
 Reference_10min.TI_S     = Reference_10min.WS_S_std./ Reference_10min.WS_S_mean;
 WriteReferenceFile(Reference_10min,'ReferencePulsed.csv')
-CompareNS(Reference_10min)
+range_MEAN  = [0 10];
+range_STD   = [0 2.5];
+range_TI    = [0 0.4];
+range_WD    = [180 280];
+CompareNS(Reference_10min,range_MEAN,range_STD,range_TI,range_WD)
 
 %% Calculate Statistics Lidar
 % remove data with error code
@@ -91,4 +99,7 @@ Lidar_10min             = Calculate10minStastics_Lidar(Lidar_N,Lidar_S,Tstart,Te
 Lidar_10min.LOS_TI_N    = Lidar_10min.LOS_N_std./Lidar_10min.LOS_N_mean;
 Lidar_10min.LOS_TI_S    = Lidar_10min.LOS_S_std./Lidar_10min.LOS_S_mean;
 % compare lidar vs Reference
-CompareLOS(Reference_10min,Lidar_10min)
+range_MEAN  = [0 10];
+range_STD   = [0 2.5];
+range_TI    = [0 0.4];
+CompareLOS(Reference_10min,Lidar_10min,range_MEAN,range_STD,range_TI)
