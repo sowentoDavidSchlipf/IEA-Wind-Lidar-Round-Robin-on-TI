@@ -2,6 +2,7 @@
 % Project: IEA Wind Task 32
 % Round Robin on turbulence estimates from nacelle mounted lidar systems
 % by Feng Guo and David Schlipf @ Flensburg University of Applied Sciences
+% v6: 17-May-2022: projection using angles from optimization
 % v5: 07-May-2022: projection using angles provided by DNV, not via
 %                   coordinates, add TI, nicer comparison 
 % v4: 11-Apr-2022: add new data
@@ -40,8 +41,8 @@ GoodData            = [1:82155,82210:82260,82310:86400];% identified using curso
 Mast_N.WS1          = interp1(Mast_N.t(GoodData),Mast_N.WS1(GoodData),Mast_N.t);
 
 % limits only for time plots
-Tstart          = '2020-09-03 19:00:00'; 
-Tend            = '2020-09-04 19:00:00';
+Tstart          = '2020-09-04 08:00:00'; 
+Tend            = '2020-09-04 10:00:00';
 CompareSonicToCupAndVane(Mast_S,Mast_N,Tstart,Tend);
 
 %% Calculate reference U (wind in x: W->E), V (wind in y: S->N)
@@ -58,9 +59,9 @@ Reference.WD_N      = Mast_N.USA_WD;
 Reference.WD_S      = Mast_S.USA_WD;
 
 %% Calculate reference LOS=-(xu+yv+zw)
-% angles of lidar beams in inertial coordinate system 
-Yaw_L_N             = 270-255.2; % 255.2 deg provided by DNV, 248.2 leads to y=-0.06+1.00x
-Yaw_L_S             = 270-222.8; % 222.8 deg provided by DNV, 221.0 leads to y= 0.00+1.00x
+% angles of lidar beams in inertial coordinate system, see BruteForceOptimizationLidarDirection.m 
+Yaw_L_N             = 270-250.2; 
+Yaw_L_S             = 270-221.8;
 % measurement equation: ignoring w
 Reference.LOS_N    	= cosd(Yaw_L_N)*Reference.U_N + sind(Yaw_L_N)*Reference.V_N;
 Reference.LOS_S    	= cosd(Yaw_L_S)*Reference.U_S + sind(Yaw_L_S)*Reference.V_S;
