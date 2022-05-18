@@ -80,7 +80,7 @@ end
 
 figure('Name','South Beam')
 hold on;grid on; box on;
-title(['North South: max at ',num2str(WD_S_v(maxIdx)),' deg'])
+title(['South Beam: max at ',num2str(WD_S_v(maxIdx)),' deg'])
 plot(WD_S_v,R2_S,'.-')
 plot(WD_S_v(maxIdx),R2_S(maxIdx),'o')
 xlabel('wind direction [deg]')
