@@ -55,7 +55,7 @@ Reference.WD_S      = Mast_S.USA_WD;
 
 %% Calculate reference LOS=-(xu+yv+zw)
 % angles of lidar beams in inertial coordinate system, see BruteForceOptimizationLidarDirection.m 
-Yaw_L_N             = 270-254.6; 
+Yaw_L_N             = 270-254.8; 
 Yaw_L_S             = 270-232.4;
 % measurement equation: ignoring w
 Reference.LOS_N    	= cosd(Yaw_L_N)*Reference.U_N + sind(Yaw_L_N)*Reference.V_N;
@@ -83,17 +83,23 @@ CompareNS(Reference_10min,range_MEAN,range_STD,range_TI,range_WD)
 Lidar_N.RWS             = Lidar_N.LineOfSightVelocity_m_s_;
 Lidar_S.RWS             = Lidar_S.LineOfSightVelocity_m_s_;
 % remove data with error code
+DeltaPhase              = 3.75; % [deg] 360/48/2
 BadData_N             	= ~strcmp('Valid',Lidar_N.RawLineOfSightValidity);
+Outliers_N              = Lidar_N.Phase_rad_<deg2rad( 90-DeltaPhase) | Lidar_N.Phase_rad_>deg2rad( 90+DeltaPhase);
 Lidar_N.RWS(BadData_N)  = NaN;
+Lidar_N.RWS(Outliers_N) = NaN;
 BadData_S            	= ~strcmp('Valid',Lidar_S.RawLineOfSightValidity);
+Outliers_S              = Lidar_S.Phase_rad_<deg2rad(270-DeltaPhase) | Lidar_S.Phase_rad_>deg2rad(270+DeltaPhase);
 Lidar_S.RWS(BadData_S)  = NaN;
+Lidar_S.RWS(Outliers_S) = NaN;
+
 % Calculate 10 min statistics
 Lidar_10min             = Calculate10minStastics_Lidar(Lidar_N,Lidar_S,Tstart,Tend); 
 % Calculate 10 min TI
 Lidar_10min.LOS_TI_N    = Lidar_10min.LOS_N_std./Lidar_10min.LOS_N_mean;
 Lidar_10min.LOS_TI_S    = Lidar_10min.LOS_S_std./Lidar_10min.LOS_S_mean;
 % compare lidar vs Reference
-range_MEAN  = [0 10];
+range_MEAN  = [0 12];
 range_STD   = [0 2.5];
 range_TI    = [0 0.4];
 CompareLOS(Reference_10min,Lidar_10min,range_MEAN,range_STD,range_TI)

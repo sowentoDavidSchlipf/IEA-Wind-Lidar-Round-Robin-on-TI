@@ -99,7 +99,7 @@ Lidar_10min             = Calculate10minStastics_Lidar(Lidar_N,Lidar_S,Tstart,Te
 Lidar_10min.LOS_TI_N    = Lidar_10min.LOS_N_std./Lidar_10min.LOS_N_mean;
 Lidar_10min.LOS_TI_S    = Lidar_10min.LOS_S_std./Lidar_10min.LOS_S_mean;
 % compare lidar vs Reference
-range_MEAN  = [0 10];
+range_MEAN  = [0 12];
 range_STD   = [0 2.5];
 range_TI    = [0 0.4];
 CompareLOS(Reference_10min,Lidar_10min,range_MEAN,range_STD,range_TI)
