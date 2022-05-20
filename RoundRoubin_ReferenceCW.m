@@ -2,6 +2,7 @@
 % Project: IEA Wind Task 32
 % Round Robin on turbulence estimates from nacelle mounted lidar systems
 % by Feng Guo and David Schlipf @ Flensburg University of Applied Sciences
+% v2: 20-May-2022, DS: improve lidar data processing 
 % v1: 17-May-2022, DS: initial version based on pulsed code
 
 clearvars;clc;close all
@@ -12,18 +13,16 @@ addpath('functions')
 
 %% Load Data and compare Sonic Cup and Vane
 if isfile('Data_CW_Period1.mat') % datenum takes a while, so we better store the data
-    load('Data_CW_Period1.mat','Mast_N','Mast_S','Lidar_N','Lidar_S');
+    load('Data_CW_Period1.mat','Mast_N','Mast_S','Lidar_N_raw','Lidar_S_raw');
 else 
     Mast_N          = readtable('T-MM-N_20170216_20170217_1Hz.csv'); 
     Mast_S          = readtable('T-MM-S_20170216_20170217_1Hz.csv'); 
-    Lidar_N        	= readtable('Raw_351@20170216_20170217_filtered_without_FFTbins_right_sector.csv');
-    Lidar_S       	= readtable('Raw_351@20170216_20170217_filtered_without_FFTbins_left_sector.csv');
+    Lidar_N_raw   	= readtable('Raw_351@20170216_20170217_filtered_without_FFTbins_right_sector.csv');
+    Lidar_S_raw   	= readtable('Raw_351@20170216_20170217_filtered_without_FFTbins_left_sector.csv');
     % add numeric time
     Mast_N.t      	= datenum(Mast_N.TIMESTAMP);
     Mast_S.t     	= datenum(Mast_S.TIMESTAMP);
-    Lidar_N.t     	= datenum(Lidar_N.Timestamp_ISO8601_,'yyyy-mm-ddTHH:MM:SS.FFF');
-    Lidar_S.t      	= datenum(Lidar_S.Timestamp_ISO8601_,'yyyy-mm-ddTHH:MM:SS.FFF');
-    save('Data_CW_Period1.mat','Mast_N','Mast_S','Lidar_N','Lidar_S');
+    save('Data_CW_Period1.mat','Mast_N','Mast_S','Lidar_N_raw','Lidar_S_raw');
 end
 
 % Data correction
@@ -56,7 +55,7 @@ Reference.WD_S      = Mast_S.USA_WD;
 %% Calculate reference LOS=-(xu+yv+zw)
 % angles of lidar beams in inertial coordinate system, see BruteForceOptimizationLidarDirection.m 
 Yaw_L_N             = 270-254.8; 
-Yaw_L_S             = 270-232.4;
+Yaw_L_S             = 270-232.2;
 % measurement equation: ignoring w
 Reference.LOS_N    	= cosd(Yaw_L_N)*Reference.U_N + sind(Yaw_L_N)*Reference.V_N;
 Reference.LOS_S    	= cosd(Yaw_L_S)*Reference.U_S + sind(Yaw_L_S)*Reference.V_S;
@@ -78,21 +77,15 @@ range_TI    = [0 0.4];
 range_WD    = [180 280];
 CompareNS(Reference_10min,range_MEAN,range_STD,range_TI,range_WD)
 
-%% Calculate Statistics Lidar
-% rename to have same structure as with pulsed lidar
-Lidar_N.RWS             = Lidar_N.LineOfSightVelocity_m_s_;
-Lidar_S.RWS             = Lidar_S.LineOfSightVelocity_m_s_;
-% remove data with error code
-DeltaPhase              = 3.75; % [deg] 360/48/2
-BadData_N             	= ~strcmp('Valid',Lidar_N.RawLineOfSightValidity);
-Outliers_N              = Lidar_N.Phase_rad_<deg2rad( 90-DeltaPhase) | Lidar_N.Phase_rad_>deg2rad( 90+DeltaPhase);
-Lidar_N.RWS(BadData_N)  = NaN;
-Lidar_N.RWS(Outliers_N) = NaN;
-BadData_S            	= ~strcmp('Valid',Lidar_S.RawLineOfSightValidity);
-Outliers_S              = Lidar_S.Phase_rad_<deg2rad(270-DeltaPhase) | Lidar_S.Phase_rad_>deg2rad(270+DeltaPhase);
-Lidar_S.RWS(BadData_S)  = NaN;
-Lidar_S.RWS(Outliers_S) = NaN;
+%% Lidar Data processing
+Phase_N                 = deg2rad( 90); %[rad]
+Phase_S                 = deg2rad(270); %[rad]
+t_offset_N              = -53;
+t_offset_S              = -54;
+Lidar_N                 = GetRWSatSpecificPhase(Lidar_N_raw,Phase_N,t_offset_N);
+Lidar_S                 = GetRWSatSpecificPhase(Lidar_S_raw,Phase_S,t_offset_S);
 
+%% Calculate Statistics Lidar
 % Calculate 10 min statistics
 Lidar_10min             = Calculate10minStastics_Lidar(Lidar_N,Lidar_S,Tstart,Tend); 
 % Calculate 10 min TI
