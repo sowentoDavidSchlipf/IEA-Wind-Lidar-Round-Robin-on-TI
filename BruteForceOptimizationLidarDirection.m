@@ -2,6 +2,7 @@
 % Project: IEA Wind Task 32
 % should be run after RoundRoubin_ReferenceCW.m/RoundRoubin_ReferencePulsed.m
 % by David Schlipf @ Flensburg University of Applied Sciences
+% v2: 27-Jun-2022: Update model fit to y=a*x (instead of y=a*x+b)
 % v1: 17-May-2022: initial version
 
 %% stuff we need for both optimizations
@@ -32,10 +33,10 @@ for i_WD_N=1:n_WD_N
     end
     
     % Calculate R^2
-    x       = Reference_10min.LOS_N_mean;
-    y       = Lidar_10min.LOS_N_mean;
-    R       = corrcoef(x,y);
-    R2_N(i_WD_N) = R(1,2);
+    x               = Reference_10min.LOS_N_mean;
+    y               = Lidar_10min.LOS_N_mean;
+    mdl             = fitlm(x,y,'intercept',false);
+    R2_N(i_WD_N)    = mdl.Rsquared.Ordinary;
     
 end
 
@@ -69,10 +70,10 @@ for i_WD_S=1:n_WD_S
     end
     
     % Calculate R^2
-    x       = Reference_10min.LOS_S_mean;
-    y       = Lidar_10min.LOS_S_mean;
-    R       = corrcoef(x,y);    
-    R2_S(i_WD_S) = R(1,2);
+    x               = Reference_10min.LOS_S_mean;
+    y               = Lidar_10min.LOS_S_mean;
+    mdl             = fitlm(x,y,'intercept',false);
+    R2_S(i_WD_S)    = mdl.Rsquared.Ordinary;    
     
 end
 

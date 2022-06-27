@@ -1,10 +1,16 @@
-function RegressionSubPlot(m,n,p,x,y,MyRange,MyXlabel,MyYlabel,MyTitle)
+function RegressionSubPlot(m,n,p,x,y,Intercept,MyRange,MyXlabel,MyYlabel,MyTitle)
 InRange = x>=MyRange(1)&x<=MyRange(2)&y>=MyRange(1)&y<=MyRange(2);
 x_r     = x(InRange);
 y_r     = y(InRange);
 % calculations
-poly    = polyfit(x_r,y_r,1);
-R       = corrcoef(x_r,y_r);
+if Intercept
+    mdl     = fitlm(x,y,'intercept',true);
+    poly    = [mdl.Coefficients.Estimate(2) mdl.Coefficients.Estimate(1)];
+else
+    mdl     = fitlm(x,y,'intercept',false);
+    poly    = [mdl.Coefficients.Estimate(1) 0]; 
+end
+Rsquared    = mdl.Rsquared.Ordinary;
 
 % plot
 subplot(m,n,p)
@@ -19,10 +25,15 @@ ylabel(MyYlabel)
 axis equal
 xlim(MyRange)
 ylim(MyRange)
-text(MyRange(1)+0.1*diff(MyRange),MyRange(1)+0.9*diff(MyRange),...
-    ['y=',num2str(poly(2),'%4.2f'),'+',num2str(poly(1),'%4.2f'),' x'])
+if Intercept
+    text(MyRange(1)+0.1*diff(MyRange),MyRange(1)+0.9*diff(MyRange),...
+        ['y=',num2str(poly(2),'%4.2f'),'+',num2str(poly(1),'%4.2f'),' x'])
+else
+    text(MyRange(1)+0.1*diff(MyRange),MyRange(1)+0.9*diff(MyRange),...
+        ['y=',num2str(poly(1),'%4.2f'),' x'])    
+end
 text(MyRange(1)+0.1*diff(MyRange),MyRange(1)+0.8*diff(MyRange),...
-    ['R^2=',num2str(R(1,2),'%5.3f')])
+    ['R^2=',num2str(Rsquared,'%5.3f')])
 text(MyRange(1)+0.1*diff(MyRange),MyRange(1)+0.7*diff(MyRange),...
     ['n=',num2str(sum(InRange))])
 
